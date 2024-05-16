@@ -12,12 +12,22 @@ from .exceptions import (
 from .util import cache, stdout_encode, debug
 import re
 
+# Initialize API_URL as a global variable with a default value
 API_URL = 'http://en.wikipedia.org/w/api.php'
 RATE_LIMIT = False
 RATE_LIMIT_MIN_WAIT = None
 RATE_LIMIT_LAST_CALL = None
 USER_AGENT = 'wikipedia (https://github.com/goldsmith/Wikipedia/)'
 
+def set_api_url(api_url):
+    '''
+    Set the API URL to the specified value.
+    
+    Arguments:
+    * api_url - (string) the API URL to be used for all requests
+    '''
+    global API_URL
+    API_URL = api_url
 
 def set_lang(prefix):
   '''
@@ -34,7 +44,6 @@ def set_lang(prefix):
   for cached_func in (search, suggest, summary):
     cached_func.clear_cache()
 
-
 def set_user_agent(user_agent_string):
   '''
   Set the User-Agent string to be used for all requests.
@@ -45,7 +54,6 @@ def set_user_agent(user_agent_string):
   '''
   global USER_AGENT
   USER_AGENT = user_agent_string
-
 
 def set_rate_limiting(rate_limit, min_wait=timedelta(milliseconds=50)):
   '''
@@ -77,7 +85,6 @@ def set_rate_limiting(rate_limit, min_wait=timedelta(milliseconds=50)):
     RATE_LIMIT_MIN_WAIT = min_wait
 
   RATE_LIMIT_LAST_CALL = None
-
 
 @cache
 def search(query, results=10, suggestion=False):
@@ -117,7 +124,6 @@ def search(query, results=10, suggestion=False):
       return list(search_results), None
 
   return list(search_results)
-
 
 @cache
 def geosearch(latitude, longitude, title=None, results=10, radius=1000):
@@ -162,7 +168,6 @@ def geosearch(latitude, longitude, title=None, results=10, radius=1000):
 
   return list(search_results)
 
-
 @cache
 def suggest(query):
   '''
@@ -183,7 +188,6 @@ def suggest(query):
     return raw_result['query']['searchinfo']['suggestion']
 
   return None
-
 
 def random(pages=1):
   '''
@@ -209,7 +213,6 @@ def random(pages=1):
     return titles[0]
 
   return titles
-
 
 @cache
 def summary(title, sentences=0, chars=0, auto_suggest=True, redirect=True):
@@ -250,7 +253,6 @@ def summary(title, sentences=0, chars=0, auto_suggest=True, redirect=True):
 
   return summary
 
-
 def page(title=None, pageid=None, auto_suggest=True, redirect=True, preload=False):
   '''
   Get a WikipediaPage object for the page with title `title` or the pageid
@@ -278,8 +280,6 @@ def page(title=None, pageid=None, auto_suggest=True, redirect=True, preload=Fals
     return WikipediaPage(pageid=pageid, preload=preload)
   else:
     raise ValueError("Either a title or a pageid must be specified")
-
-
 
 class WikipediaPage(object):
   '''
@@ -386,7 +386,7 @@ class WikipediaPage(object):
       request = _wiki_request(query_params)
       html = request['query']['pages'][pageid]['revisions'][0]['*']
 
-      lis = BeautifulSoup(html, 'html.parser').find_all('li')
+      lis = BeautifulSoup(html).find_all('li')
       filtered_lis = [li for li in lis if not 'tocsection' in ''.join(li.get('class', []))]
       may_refer_to = [li.a.get_text() for li in filtered_lis if li.a]
 
@@ -643,8 +643,7 @@ class WikipediaPage(object):
         'action': 'parse',
         'prop': 'sections',
       }
-      if not getattr(self, 'title', None) is None:
-          query_params["page"] = self.title
+      query_params.update(self.__title_query_param)
 
       request = _wiki_request(query_params)
       self._sections = [section['line'] for section in request['parse']['sections']]
@@ -676,7 +675,6 @@ class WikipediaPage(object):
 
     return self.content[index:next_index].lstrip("=").strip()
 
-
 @cache
 def languages():
   '''
@@ -700,7 +698,6 @@ def languages():
     for lang in languages
   }
 
-
 def donate():
   '''
   Open up the Wikimedia donate page in your favorite browser.
@@ -708,7 +705,6 @@ def donate():
   import webbrowser
 
   webbrowser.open('https://donate.wikimedia.org/w/index.php?title=Special:FundraiserLandingPage', new=2)
-
 
 def _wiki_request(params):
   '''
@@ -719,7 +715,7 @@ def _wiki_request(params):
   global USER_AGENT
 
   params['format'] = 'json'
-  if not 'action' in params:
+  if 'action' not in params:
     params['action'] = 'query'
 
   headers = {
