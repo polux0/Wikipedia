@@ -24,19 +24,19 @@ version = re.search(
 
 
 setuptools.setup(
-  name = "wikipedia",
+  name = "tc-wikipedia-lib",
   version = '.'.join(version),
-  author = "Jonathan Goldsmith",
-  author_email = "jhghank@gmail.com",
-  description = "Wikipedia API for Python",
+  author = "Jonathan Goldsmith, modified by Aleksa Stojanović",
+  author_email = "alexusnavas@gmail.com",
+  description = "Wikimedia API for Python",
   license = "MIT",
-  keywords = "python wikipedia API",
-  url = "https://github.com/goldsmith/Wikipedia",
+  keywords = "python wikimedia API",
+  url = "https://github.com/polux0/Wikipedia",
   install_requires = install_reqs,
   packages = ['wikipedia'],
   long_description = local_file('README.rst').read(),
   classifiers = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 1 - Beta',
     'Topic :: Software Development :: Libraries',
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python',
