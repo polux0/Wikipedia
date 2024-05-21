@@ -36,7 +36,7 @@ setuptools.setup(
   packages = ['wikipedia'],
   long_description = local_file('README.rst').read(),
   classifiers = [
-    'Development Status :: 1 - Beta',
+    'Development Status :: 4 - Beta',
     'Topic :: Software Development :: Libraries',
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python',
